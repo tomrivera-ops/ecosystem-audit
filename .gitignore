@@ -1,0 +1,21 @@
+# This repo tracks TOOLING + the drift baseline ONLY. Never source. Never reports.
+
+# Cloned fleet source — re-derived from roster.sh, never committed (this is the
+# exact category that made dev-audit a liability).
+repos
+repos/
+
+# Derived reports/inventory — regenerable from the scanners; go stale instantly.
+# Keep ONLY drift-policy.json (the ratchet ledger).
+ecosystem-inventory/*
+!ecosystem-inventory/drift-policy.json
+
+# Synthesis / segment outputs are reports — keep them out of version control.
+segment-*.md
+_governance-ssot*.md
+*-report.md
+
+# Standard
+node_modules/
+.DS_Store
+*.log

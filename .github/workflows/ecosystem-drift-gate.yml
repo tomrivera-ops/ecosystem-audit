@@ -1,0 +1,54 @@
+name: Ecosystem Drift Gate
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift-gate:
+    name: nightly fleet drift check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Authenticate gh for fleet clone
+        env:
+          GH_TOKEN: ${{ secrets.ECOSYSTEM_READ_TOKEN }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "ECOSYSTEM_READ_TOKEN secret is required for roster.sh deep"
+            exit 1
+          fi
+          echo "${GH_TOKEN}" | gh auth login --with-token
+          gh auth status
+
+      - name: Enumerate and shallow-clone fleet
+        env:
+          GH_TOKEN: ${{ secrets.ECOSYSTEM_READ_TOKEN }}
+        run: |
+          ./roster.sh list
+          ./roster.sh deep
+
+      - name: Coupling scan
+        run: node coupling-scan.js repos
+
+      - name: Drift gate (fail on new drift)
+        run: node drift-gate.js repos
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecosystem-scan-${{ github.run_id }}
+          path: |
+            ecosystem-inventory/_coupling.yaml
+            ecosystem-inventory/_coupling.json
+          retention-days: 14
