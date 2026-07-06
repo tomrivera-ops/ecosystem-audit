@@ -34,17 +34,11 @@ jobs:
           private-key: ${{ secrets.FARADAY_APP_PRIVATE_KEY }}
           owner: tomrivera-ops
 
-      - name: Authenticate gh for fleet clone
+      - name: Verify token and enumerate fleet
         env:
           GH_TOKEN: ${{ steps.tok-ops.outputs.token }}
         run: |
-          gh auth login --with-token <<< "$GH_TOKEN"
           gh auth status
-
-      - name: Enumerate and shallow-clone fleet
-        env:
-          GH_TOKEN: ${{ steps.tok-ops.outputs.token }}
-        run: |
           ./roster.sh list
           ./roster.sh deep
 
