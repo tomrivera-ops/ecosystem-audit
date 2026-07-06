@@ -19,20 +19,34 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Generate installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FARADAY_APP_ID }}
+          private-key: ${{ secrets.FARADAY_APP_PRIVATE_KEY }}
+          owner: >-
+            faraday-platform,
+            faraday-studio,
+            faraday-accounting-control-panel-facp,
+            faraday-build,
+            faraday-beacon,
+            faraday-capital-systems,
+            orbitconsole,
+            signal-interface,
+            tomrivera-PSE,
+            tomrivera-ops
+
       - name: Authenticate gh for fleet clone
         env:
-          GH_TOKEN: ${{ secrets.ECOSYSTEM_READ_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          if [ -z "${GH_TOKEN}" ]; then
-            echo "ECOSYSTEM_READ_TOKEN secret is required for roster.sh deep"
-            exit 1
-          fi
-          echo "${GH_TOKEN}" | gh auth login --with-token
+          gh auth login --with-token <<< "$GH_TOKEN"
           gh auth status
 
       - name: Enumerate and shallow-clone fleet
         env:
-          GH_TOKEN: ${{ secrets.ECOSYSTEM_READ_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           ./roster.sh list
           ./roster.sh deep
