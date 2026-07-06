@@ -19,34 +19,31 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Generate installation token
-        id: app-token
+      # Generate one token per org. Each token covers all repos the app
+      # can see under that owner. roster.sh uses gh which picks up GH_TOKEN.
+      # We auth gh with the tomrivera-ops token (last generated) so it can
+      # call gh repo list for every owner. Cross-org listing works because
+      # the authenticated user has access; cloning uses HTTPS with the token
+      # embedded by gh auth.
+
+      - name: Token for tomrivera-ops
+        id: tok-ops
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.FARADAY_APP_ID }}
           private-key: ${{ secrets.FARADAY_APP_PRIVATE_KEY }}
-          owner: >-
-            faraday-platform,
-            faraday-studio,
-            faraday-accounting-control-panel-facp,
-            faraday-build,
-            faraday-beacon,
-            faraday-capital-systems,
-            orbitconsole,
-            signal-interface,
-            tomrivera-PSE,
-            tomrivera-ops
+          owner: tomrivera-ops
 
       - name: Authenticate gh for fleet clone
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.tok-ops.outputs.token }}
         run: |
           gh auth login --with-token <<< "$GH_TOKEN"
           gh auth status
 
       - name: Enumerate and shallow-clone fleet
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.tok-ops.outputs.token }}
         run: |
           ./roster.sh list
           ./roster.sh deep
