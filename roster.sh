@@ -63,6 +63,10 @@ list() {
 deep() {
   [ -s "$REPOLIST" ] || { echo "run './roster.sh list' first"; exit 1; }
   [ -f ecosystem-discover.js ] || { echo "ecosystem-discover.js not found in cwd — drop it in first, then rerun"; exit 1; }
+  # Inject GH_TOKEN into HTTPS clone URLs (CI uses app token, local uses gh auth)
+  if [ -n "${GH_TOKEN:-}" ]; then
+    git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+  fi
   mkdir -p repos
   while read -r nwo; do
     [ -z "$nwo" ] && continue
