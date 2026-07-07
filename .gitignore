@@ -15,6 +15,12 @@ segment-*.md
 _governance-ssot*.md
 *-report.md
 
+# Credentials / secrets — never committed under any circumstances.
+*.pem
+*.env
+.env.local
+org-tokens.json
+
 # Standard
 node_modules/
 .DS_Store
