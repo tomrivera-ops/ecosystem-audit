@@ -329,7 +329,8 @@
       "tomrivera-ops__ecosystem-audit|UI_URL",
       "tomrivera-ops__ecosystem-audit|VITE_API_BASE_URL",
       "tomrivera-ops__ecosystem-audit|VITE_API_URL",
-      "tomrivera-ops__ecosystem-audit|YOUR_GIT_URL"
+      "tomrivera-ops__ecosystem-audit|YOUR_GIT_URL",
+      "tomrivera-ops__ecosystem-audit|OLLAMA_BASE_URL"
     ],
     "python_import_edge": [
       "orbitconsole__orbit-console|faraday-platform__faraday-platform|fcs_core"
