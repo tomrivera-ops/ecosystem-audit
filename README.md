@@ -39,6 +39,8 @@ Workflow: `.github/workflows/ecosystem-drift-gate.yml` — cron `0 6 * * *` + `w
 
 GitHub Free private repos return 403 "Upgrade to GitHub Pro" from the REST protection API. For those, the monitor falls back to GraphQL, which still lists branch protection rules and rulesets (including inherited org rulesets) and each open PR's review decision. A repo is COMPLIANT only on positive evidence of no gate (`basis` recorded in the ledger); a GraphQL failure stays UNVERIFIED.
 
+Owners with no `faraday-ci-bot` installation token are never scanned partially (an unauthenticated listing would show public repos only); they are reported as uncovered and block the run unless listed in the ledger's `owner_exceptions` with a reason. Current exceptions: coach-insight, faraday-enterprise, faraday-music, jetson-protocol, payroll-synergy-experts. The app is not installed there because installing it would grant write access beyond what the monitor needs. Verify them with a founder-token run: `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`.
+
 Bot and AI reviews (`faraday-ci-bot`, `chatgpt-codex-connector`) are not human approval. The monitor never changes a protection; findings fail the nightly job and update one deduplicated `governance-drift` issue in this repo (closed automatically when clean). Reports are uploaded as 90-day artifacts; the ledger's git history is the permanent record.
 
 ```bash

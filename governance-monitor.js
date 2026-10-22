@@ -200,7 +200,7 @@ function blockingFindings(results, ownerErrors) {
     if (r.new_repo) keys.push(`NEW_REPO|${r.repo}`);
     if (r.status === 'UNVERIFIED' && !r.accepted_unverified) keys.push(`UNVERIFIED|${r.repo}`);
   }
-  for (const e of ownerErrors) keys.push(`UNVERIFIED_OWNER|${e.owner}|${e.error}`);
+  for (const e of ownerErrors) if (!e.accepted) keys.push(`UNVERIFIED_OWNER|${e.owner}|${e.error}`);
   return keys.sort();
 }
 
@@ -274,11 +274,23 @@ async function listUserRepos(request, owner) {
 // Scan
 // ---------------------------------------------------------------------------
 
-async function scan(request, baseline) {
+// Without a token an org listing still succeeds but returns public repos only, so an owner with
+// no installation token is never scanned partially: it is reported as uncovered. The ledger's
+// owner_exceptions may accept exactly that condition (documented coverage gap); nothing else.
+const NO_TOKEN = 'no app installation token (private repos not visible)';
+
+async function scan(request, baseline, { hasToken = () => true } = {}) {
   const founder = baseline.founder;
+  const exceptions = baseline.owner_exceptions || {};
   const results = [];
   const ownerErrors = [];
   for (const owner of baseline.owners) {
+    if (!hasToken(owner)) {
+      const e = { owner, error: NO_TOKEN };
+      if (exceptions[owner]) Object.assign(e, { accepted: true, exception: exceptions[owner] });
+      ownerErrors.push(e);
+      continue;
+    }
     const listed = owner === founder ? await listUserRepos(request, owner) : await paginate(request, owner, `/orgs/${owner}/repos?type=all`);
     if (listed.error) {
       ownerErrors.push({ owner, error: readError(listed.error) });
@@ -315,6 +327,7 @@ function summarize(results, ownerErrors, keys) {
   const counts = {};
   for (const r of results) counts[r.status] = (counts[r.status] || 0) + 1;
   counts.NEW_REPO = results.filter((r) => r.new_repo).length;
+  counts.UNCOVERED_OWNERS = ownerErrors.length;
   return { counts, owner_errors: ownerErrors, blocking: keys, fingerprint: fingerprint(keys) };
 }
 
@@ -328,6 +341,12 @@ function renderMarkdown(report) {
   if (report.summary.blocking.length) {
     lines.push('## Blocking findings', '');
     for (const k of report.summary.blocking) lines.push(`- \`${k}\``);
+    lines.push('');
+  }
+  const owners = report.summary.owner_errors || [];
+  if (owners.length) {
+    lines.push('## Owners not covered by this run', '');
+    for (const e of owners) lines.push(`- ${e.owner}: ${e.error}${e.accepted ? ` — accepted exception: ${e.exception}` : ' — BLOCKING'}`);
     lines.push('');
   }
   const adv = report.results.filter((r) => r.advisories.length);
@@ -350,10 +369,13 @@ function loadTokens() {
 
 async function cmdScan(args) {
   const baseline = JSON.parse(fs.readFileSync(args.baseline || BASELINE_PATH, 'utf8'));
+  const tokens = loadTokens();
+  const defaultToken = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
   const request = args.fixtures
     ? fixtureClient(JSON.parse(fs.readFileSync(args.fixtures, 'utf8')))
-    : liveClient({ tokens: loadTokens(), defaultToken: process.env.GH_TOKEN || process.env.GITHUB_TOKEN });
-  const { results, ownerErrors } = await scan(request, baseline);
+    : liveClient({ tokens, defaultToken });
+  const hasToken = args.fixtures ? () => true : (owner) => Boolean(tokens[owner] || defaultToken);
+  const { results, ownerErrors } = await scan(request, baseline, { hasToken });
 
   if (args['update-baseline']) {
     const repos = { ...(baseline.repos || {}) };
