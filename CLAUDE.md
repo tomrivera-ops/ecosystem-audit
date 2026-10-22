@@ -19,6 +19,8 @@ ecosystem-audit is the fleet-wide drift-detection gate. It observes repos across
 - `ecosystem-inventory/drift-policy.json` — accepted baseline. Do not edit by hand; use `node drift-gate.js repos --update-baseline`.
 - `docs/adr/ADR-0001-fleet-migration-triggers.md` — fleet enrollment criteria.
 - `.github/workflows/ecosystem-drift-gate.yml` — the pipeline.
+- `governance-monitor.js` + `governance/approval-coverage.json` — read-only approval-governance monitor (ADR-0013) and its coverage ledger. Update the ledger only via `node governance-monitor.js scan --update-baseline`, through a PR. Never make the monitor modify protections.
+- `.github/workflows/required-checks.yml` — PR gate; `required-checks` is the required status check on `main`.
 
 ## Auth — do not break this
 
@@ -46,10 +48,6 @@ ecosystem-audit is the fleet-wide drift-detection gate. It observes repos across
 
 ## PR workflow
 
-`main` is protected with `enforce_admins: true`. No direct pushes — everything is a PR merged via `faraday-ci-bot`:
+`main` is protected with `enforce_admins: true`, 0 required approvals (ADR-0013: the founder is the only required human approver), and required status check `required-checks`. No direct pushes. Open a PR, let `required-checks` pass, and the founder merges it.
 
-```bash
-gh workflow run 307201282 -f owner=tomrivera-ops \
-  -f repo=tomrivera-ops/ecosystem-audit -f pr_number=<N> \
-  -f merge_method=squash --repo tomrivera-ops/.github
-```
+The legacy `faraday-ci-bot` dispatch path (`cli-approve-merge`, workflow 307201282 in `tomrivera-ops/.github`) still exists. Its approval is unconditional, so it is founder authorization relayed by a bot, not an independent review.

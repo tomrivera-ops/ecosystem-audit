@@ -1,0 +1,31 @@
+{
+  "GET /orgs/acme/repos?type=all&per_page=100&page=1": {"status": 200, "body": [
+    {"full_name": "acme/compliant", "default_branch": "main", "archived": false},
+    {"full_name": "acme/noncompliant", "default_branch": "main", "archived": false},
+    {"full_name": "acme/missing-permission", "default_branch": "main", "archived": false},
+    {"full_name": "acme/brand-new", "default_branch": "main", "archived": false},
+    {"full_name": "acme/old", "default_branch": "main", "archived": true}
+  ]},
+  "GET /repos/acme/compliant/branches/main/protection": {"status": 200, "body": {
+    "required_pull_request_reviews": {"required_approving_review_count": 0, "require_code_owner_reviews": false, "require_last_push_approval": false},
+    "required_status_checks": {"strict": true, "contexts": ["required-checks"]}
+  }},
+  "GET /repos/acme/compliant/rules/branches/main": {"status": 200, "body": []},
+  "GET /repos/acme/compliant/environments": {"status": 200, "body": {"environments": [
+    {"name": "production", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": false, "reviewers": [{"type": "User", "reviewer": {"login": "founder"}}]}]}
+  ]}},
+  "GET /repos/acme/noncompliant/branches/main/protection": {"status": 200, "body": {
+    "required_pull_request_reviews": {"required_approving_review_count": 1, "require_code_owner_reviews": true},
+    "required_status_checks": null
+  }},
+  "GET /repos/acme/noncompliant/rules/branches/main": {"status": 200, "body": [
+    {"type": "pull_request", "ruleset_source_type": "Organization", "ruleset_source": "acme", "ruleset_id": 7, "parameters": {"required_approving_review_count": 2}}
+  ]},
+  "GET /repos/acme/noncompliant/environments": {"status": 200, "body": {"environments": []}},
+  "GET /repos/acme/missing-permission/branches/main/protection": {"status": 403, "body": {"message": "Resource not accessible by integration"}},
+  "GET /repos/acme/missing-permission/rules/branches/main": {"status": 403, "body": {"message": "Upgrade to GitHub Pro or make this repository public to enable this feature."}},
+  "GET /repos/acme/missing-permission/environments": {"status": 200, "body": {"environments": []}},
+  "GET /repos/acme/brand-new/branches/main/protection": {"status": 404, "body": {"message": "Branch not protected"}},
+  "GET /repos/acme/brand-new/rules/branches/main": {"status": 200, "body": []},
+  "GET /repos/acme/brand-new/environments": {"status": 200, "body": {"environments": []}}
+}

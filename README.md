@@ -25,6 +25,26 @@ Workflow: `.github/workflows/ecosystem-drift-gate.yml` — cron `0 6 * * *` + `w
 5. `drift-gate.js repos` — fails on new drift beyond baseline
 6. Upload scan artifacts (14-day retention)
 
+## Approval governance monitor (ADR-0013)
+
+`governance-monitor.js` is a read-only check that the founder (`tomrivera-PSE`) is the only required human approver fleet-wide ([ADR-0013](https://github.com/tomrivera-ops/agent-contracts/blob/main/decisions/ADR-0013-solo-founder-human-approval.md)). It runs in the nightly workflow with the same per-org app tokens, and for each non-archived repo in every owner in `governance/approval-coverage.json` it reads default-branch protection, effective rulesets (repo + org), and environment reviewers.
+
+| Status | Meaning |
+|---|---|
+| `COMPLIANT` | No approval-count, code-owner, last-push or environment-reviewer gate that a founder-authored PR cannot satisfy |
+| `NONCOMPLIANT` | At least one such gate is enforced (blocking) |
+| `UNVERIFIED` | A read failed (missing permission, plan-limited, unknown rule type). **Never treated as compliant.** Blocking unless recorded as a known gap in the coverage ledger |
+| `EXCEPTION` | Documented external segregation-of-duties obligation in the ledger |
+| `NEW_REPO` | Repo not yet in coverage (blocking until added via `--update-baseline` PR) |
+
+Bot and AI reviews (`faraday-ci-bot`, `chatgpt-codex-connector`) are not human approval. The monitor never changes a protection; findings fail the nightly job and update one deduplicated `governance-drift` issue in this repo (closed automatically when clean). Reports are uploaded as 90-day artifacts; the ledger's git history is the permanent record.
+
+```bash
+node governance-monitor.js scan                    # enforce (exit 1 on blocking findings)
+node governance-monitor.js scan --update-baseline  # record coverage, through a PR
+node --test test/*.test.js                         # fixtures: compliant / noncompliant / missing-permission / new-repo
+```
+
 ## Baseline
 
 `ecosystem-inventory/drift-policy.json` holds the accepted findings baseline (currently 313 findings across 39 repos / 15 orgs). Finding keys use the `org__repo` format (CI canonical). The gate fails only on **new** keys not in the accepted set; existing findings are warn-only.
@@ -73,7 +93,10 @@ Deliberately excluded: pulse-trading, MARZ-ai, RVCG-Consulting, ESL-Gospel-Conne
 | `ecosystem-inventory/drift-policy.json` | **The ratchet ledger** — accepted-drift baseline + rules |
 | `stage2-synthesis-prompt.md` | Synthesis prompt (consumes frozen inventory) |
 | `governance-ssot-discovery.md` | Read-only discovery prompt |
-| `.github/workflows/ecosystem-drift-gate.yml` | Nightly org-wide drift gate |
+| `.github/workflows/ecosystem-drift-gate.yml` | Nightly org-wide drift gate + approval governance scan |
+| `.github/workflows/required-checks.yml` | PR gate (`required-checks`): syntax, ledger validity, monitor tests |
+| `governance-monitor.js` | Approval-governance drift monitor (read-only) |
+| `governance/approval-coverage.json` | Approval-governance coverage ledger |
 | `docs/adr/ADR-0001-fleet-migration-triggers.md` | Fleet enrollment criteria |
 
 ## What NEVER lives here (gitignored)
@@ -83,7 +106,7 @@ Deliberately excluded: pulse-trading, MARZ-ai, RVCG-Consulting, ESL-Gospel-Conne
 
 ## Governance
 
-Public repo. `main` protected: `enforce_admins: true`, 1 required review, dismiss-stale reviews, no force-push, no deletions. All changes go through PR + `faraday-ci-bot`. See [CLAUDE.md](CLAUDE.md) for AI-assistant operating rules.
+Public repo. `main` protected: `enforce_admins: true`, PR required with 0 required approvals (ADR-0013), required status check `required-checks`, dismiss-stale reviews, no force-push, no deletions. Founder-authored PRs merge once `required-checks` passes. See [CLAUDE.md](CLAUDE.md) for AI-assistant operating rules.
 
 ## Provenance
 

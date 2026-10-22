@@ -1,0 +1,37 @@
+name: Required checks
+
+# Runs on every PR (no path filter) so it can be a required status check without stalling PRs.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  required-checks:
+    name: required-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Syntax check scripts
+        run: |
+          for f in *.js; do node --check "$f"; done
+          bash -n roster.sh
+
+      - name: Validate ledgers are well-formed JSON
+        run: |
+          node -e 'JSON.parse(require("fs").readFileSync("ecosystem-inventory/drift-policy.json"))'
+          node -e 'const b=JSON.parse(require("fs").readFileSync("governance/approval-coverage.json")); if(!b.founder||!Array.isArray(b.owners)||!b.owners.length) throw new Error("coverage baseline missing founder/owners")'
+
+      - name: Governance monitor tests (compliant / noncompliant / missing-permission / new-repo fixtures)
+        run: node --test test/*.test.js
