@@ -77,6 +77,44 @@ test('owner that cannot be listed is reported as UNVERIFIED_OWNER', async () => 
   assert.ok(m.blockingFindings(results, ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|ghost|')));
 });
 
+test('founder account: private repos come from /user/repos; public-only fallback is UNVERIFIED_OWNER', async () => {
+  const ok = (repo) => ({
+    [`GET /repos/${repo}/branches/main/protection`]: { status: 404, body: { message: 'Branch not protected' } },
+    [`GET /repos/${repo}/rules/branches/main`]: { status: 200, body: [] },
+    [`GET /repos/${repo}/environments`]: { status: 200, body: { environments: [] } },
+  });
+  const b = { founder: 'founder', owners: ['founder'], repos: {} };
+  const userFx = {
+    'GET /user/repos?affiliation=owner&per_page=100&page=1': { status: 200, body: [
+      { full_name: 'founder/private-one', default_branch: 'main', private: true, owner: { login: 'founder' } },
+      { full_name: 'someorg/not-mine', default_branch: 'main', owner: { login: 'someorg' } },
+    ] },
+    ...ok('founder/private-one'),
+  };
+  let res = await m.scan(m.fixtureClient(userFx), b);
+  assert.deepStrictEqual(res.results.map((r) => r.repo), ['founder/private-one']);
+  assert.deepStrictEqual(res.ownerErrors, []);
+
+  const instFx = {
+    'GET /installation/repositories?per_page=100': { status: 200, body: { total_count: 1, repositories: [
+      { full_name: 'founder/private-one', default_branch: 'main', owner: { login: 'founder' } },
+    ] } },
+    ...ok('founder/private-one'),
+  };
+  res = await m.scan(m.fixtureClient(instFx), b);
+  assert.deepStrictEqual(res.results.map((r) => r.repo), ['founder/private-one']);
+
+  const pubFx = {
+    'GET /users/founder/repos?type=owner&per_page=100&page=1': { status: 200, body: [
+      { full_name: 'founder/public-one', default_branch: 'main', owner: { login: 'founder' } },
+    ] },
+    ...ok('founder/public-one'),
+  };
+  res = await m.scan(m.fixtureClient(pubFx), b);
+  assert.deepStrictEqual(res.results.map((r) => r.repo), ['founder/public-one']);
+  assert.ok(m.blockingFindings(res.results, res.ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|founder|private repos not listable')));
+});
+
 test('environment gates: non-founder reviewer and prevent_self_review are noncompliant', () => {
   const ok200 = { status: 200, body: [] };
   const r = m.classifyRepo({
