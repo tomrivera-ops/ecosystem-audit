@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  issues: write  # governance-monitor alert: one deduplicated governance-drift issue in this repo
 
 jobs:
   drift-gate:
@@ -83,6 +84,20 @@ jobs:
       - name: Drift gate (fail on new drift)
         run: node drift-gate.js repos
 
+      # Read-only approval-governance drift check (ADR-0013). Never modifies a protection.
+      - name: Approval governance scan
+        id: governance
+        if: always()
+        env:
+          ORG_TOKENS_FILE: /tmp/org-tokens.json
+        run: node governance-monitor.js scan
+
+      - name: Approval governance alert (deduplicated issue)
+        if: always() && steps.governance.outcome != 'skipped'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node governance-monitor.js alert --report ecosystem-inventory/governance/approval-governance.json
+
       - name: Upload scan artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,3 +107,13 @@ jobs:
             ecosystem-inventory/_coupling.yaml
             ecosystem-inventory/_coupling.json
           retention-days: 14
+
+      # Governance before/after history: 90-day artifact per run; the coverage ledger's git history is the permanent record.
+      - name: Upload governance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approval-governance-${{ github.run_id }}
+          path: ecosystem-inventory/governance/
+          if-no-files-found: warn
+          retention-days: 90

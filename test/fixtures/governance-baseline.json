@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "founder": "founder",
+  "policy": "ADR-0013",
+  "owners": ["acme"],
+  "repos": {
+    "acme/compliant": {"accepted_status": "COMPLIANT"},
+    "acme/noncompliant": {"accepted_status": "COMPLIANT"},
+    "acme/missing-permission": {"accepted_status": "COMPLIANT"}
+  }
+}
