@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # permission-probe.sh <owner> — read-only check that the current GH_TOKEN can read branch
-# protection on every non-archived repo it can see for <owner>.
+# protection (Administration: read) and deployment environments (Actions: read) on every
+# non-archived repo it can see for <owner>. These are the reads governance-monitor.js needs.
 # Exit 0 only if at least one repo is visible and every repo is READABLE. A repo answering
 # "Resource not accessible by integration" means the token lacks Administration: read.
 # Writes permission-probe.json, plus a markdown table to $GITHUB_STEP_SUMMARY when set.
@@ -38,6 +39,15 @@ while read -r full branch; do
     verdict=NOT_EFFECTIVE; detail="403 Resource not accessible by integration"; fail=1
   else
     verdict=UNVERIFIED; detail="$(tr '\n' ' ' <<<"$body" | cut -c1-160)"; fail=1
+  fi
+  # Deployment environments (environment required-reviewer gates) need Actions: read.
+  erc=0; ebody=$(gh api "repos/$full/environments" 2>&1) || erc=$?
+  if [ "$erc" -eq 0 ] || grep -q '"status":"404"\|Not Found' <<<"$ebody"; then
+    detail="$detail; environments readable"
+  else
+    verdict=NOT_EFFECTIVE; fail=1
+    if grep -q 'Resource not accessible by integration' <<<"$ebody"; then detail="$detail; environments 403 Resource not accessible by integration"
+    else detail="$detail; environments: $(tr '\n' ' ' <<<"$ebody" | cut -c1-120)"; fi
   fi
   jq -nc --arg repo "$full" --arg verdict "$verdict" --arg detail "$detail" '{repo:$repo,verdict:$verdict,detail:$detail}' >> permission-probe.ndjson
   echo "$verdict  $full  ($detail)"
