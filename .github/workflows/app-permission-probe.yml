@@ -1,7 +1,8 @@
 name: App permission probe
 
 # Manual, read-only check that a freshly minted faraday-ci-bot installation token for one
-# owner carries Administration: read. The token is minted restricted to administration:read +
+# owner carries Administration: read (branch protection) and Actions: read (deployment
+# environments). The token is minted restricted to administration:read + actions:read +
 # metadata:read so it cannot write. The mint can still succeed when the installation has not
 # accepted the permission (observed: run 39819000744), so the protection reads are the proof.
 # Uses the existing org-level app credentials; changes nothing.
@@ -33,6 +34,7 @@ jobs:
           private-key: ${{ secrets.FARADAY_APP_PRIVATE_KEY }}
           owner: ${{ inputs.owner }}
           permission-administration: read
+          permission-actions: read
           permission-metadata: read
 
       - name: Probe branch protection reads

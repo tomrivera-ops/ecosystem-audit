@@ -43,7 +43,7 @@ Owners with no `faraday-ci-bot` installation token are never scanned partially (
 
 Bot and AI reviews (`faraday-ci-bot`, `chatgpt-codex-connector`) are not human approval. The monitor never changes a protection; findings fail the nightly job and update one deduplicated `governance-drift` issue in this repo (closed automatically when clean). Reports are uploaded as 90-day artifacts; the ledger's git history is the permanent record.
 
-Before enabling the nightly scan for an installation, verify that a freshly minted token actually carries the permission. Run the **App permission probe** workflow (`workflow_dispatch`, input `owner`). It mints a token restricted to `administration: read` + `metadata: read`, so the token cannot write. The mint can succeed even when the permission hasn't been accepted, so the evidence is the reads: the probe reads branch protection on every repo of that owner and fails on any `Resource not accessible by integration`.
+Before enabling the nightly scan for an installation, verify that a freshly minted token actually carries the permission. Run the **App permission probe** workflow (`workflow_dispatch`, input `owner`). It mints a token restricted to `administration: read` + `actions: read` + `metadata: read`, so the token cannot write. The mint can succeed even when a permission hasn't been accepted, so the evidence is the reads: the probe reads branch protection (Administration) and deployment environments (Actions) on every repo of that owner, and fails on any `Resource not accessible by integration`.
 
 ```bash
 node governance-monitor.js scan                    # enforce (exit 1 on blocking findings)
