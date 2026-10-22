@@ -64,8 +64,10 @@ function liveClient({ tokens, defaultToken }) {
 }
 
 function fixtureClient(fixtures) {
-  return async function request(_owner, method, p) {
-    const key = `${method} ${p}`;
+  return async function request(_owner, method, p, body) {
+    // GraphQL fixtures are keyed per repo: "POST /graphql owner/name".
+    const v = p === '/graphql' && body && body.variables;
+    const key = v ? `${method} ${p} ${v.owner}/${v.name}` : `${method} ${p}`;
     if (Object.prototype.hasOwnProperty.call(fixtures, key)) return fixtures[key];
     return { status: 404, body: { message: `fixture missing: ${key}` } };
   };
@@ -206,6 +208,51 @@ function fingerprint(keys) {
   return crypto.createHash('sha256').update(keys.join('\n')).digest('hex').slice(0, 16);
 }
 
+// GitHub Free private repos: the REST protection/rulesets endpoints answer 403 "Upgrade to
+// GitHub Pro", but GraphQL still lists any branch protection rules and rulesets (including
+// inherited org rulesets) and reports each open PR's review decision. Zero rules plus no
+// REVIEW_REQUIRED PR is positive evidence of no gate; any GraphQL failure stays UNVERIFIED.
+const PLAN_LIMITED = /Upgrade to GitHub (Pro|Team)/i;
+const GRAPHQL_GATES = `query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    branchProtectionRules(first: 50) { totalCount nodes { pattern requiredApprovingReviewCount requiresCodeOwnerReviews } }
+    rulesets(first: 50, includeParents: true) { totalCount nodes { name enforcement rules(first: 50) { nodes { type
+      parameters { ... on PullRequestParameters { requiredApprovingReviewCount requireCodeOwnerReview } } } } } }
+    pullRequests(states: OPEN, first: 50) { nodes { number reviewDecision } }
+  }
+}`;
+
+function isPlanLimited(result) {
+  return result.status === 'UNVERIFIED' && result.unverified.length > 0 &&
+    result.unverified.every((u) => /HTTP 403/.test(u) && PLAN_LIMITED.test(u));
+}
+
+async function graphqlGates(request, owner, full) {
+  const [o, name] = full.split('/');
+  const r = await request(owner, 'POST', '/graphql', { query: GRAPHQL_GATES, variables: { owner: o, name } });
+  const repo = r.status === 200 && r.body && !r.body.errors && r.body.data && r.body.data.repository;
+  if (!repo) return { error: r.body && r.body.errors ? `GraphQL: ${r.body.errors.map((e) => e.message).join('; ')}` : readError(r) };
+  const findings = [];
+  for (const rule of repo.branchProtectionRules.nodes) {
+    if ((rule.requiredApprovingReviewCount || 0) > 0) findings.push(`graphql.branch_protection[${rule.pattern}].required_approving_review_count=${rule.requiredApprovingReviewCount}`);
+    if (rule.requiresCodeOwnerReviews) findings.push(`graphql.branch_protection[${rule.pattern}].require_code_owner_reviews=true`);
+  }
+  for (const rs of repo.rulesets.nodes) {
+    for (const rule of rs.rules.nodes) {
+      const prm = rule.parameters || {};
+      if (rule.type !== 'PULL_REQUEST') continue;
+      if ((prm.requiredApprovingReviewCount || 0) > 0) findings.push(`graphql.ruleset[${rs.name}:${rs.enforcement}].required_approving_review_count=${prm.requiredApprovingReviewCount}`);
+      if (prm.requireCodeOwnerReview) findings.push(`graphql.ruleset[${rs.name}:${rs.enforcement}].require_code_owner_review=true`);
+    }
+  }
+  const open = repo.pullRequests.nodes;
+  for (const pr of open) if (pr.reviewDecision === 'REVIEW_REQUIRED') findings.push(`graphql.open_pr#${pr.number}.reviewDecision=REVIEW_REQUIRED`);
+  return {
+    findings,
+    evidence: { branch_protection_rules: repo.branchProtectionRules.totalCount, rulesets: repo.rulesets.totalCount, open_prs_checked: open.length },
+  };
+}
+
 // A personal account's private repos are only visible through authenticated listings:
 // /user/repos (user token) or /installation/repositories (app installation token).
 // /users/{login}/repos returns public repos only, so falling back to it is reported, never silent.
@@ -245,7 +292,20 @@ async function scan(request, baseline) {
       const protection = await request(owner, 'GET', `/repos/${full}/branches/${br}/protection`);
       const rules = await request(owner, 'GET', `/repos/${full}/rules/branches/${br}`);
       const environments = await request(owner, 'GET', `/repos/${full}/environments`);
-      results.push(classifyRepo({ repo: full, protection, rules, environments, founder }));
+      const result = classifyRepo({ repo: full, protection, rules, environments, founder });
+      if (isPlanLimited(result)) {
+        const g = await graphqlGates(request, owner, full);
+        if (g.error) {
+          result.unverified.push(`graphql fallback: ${g.error}`);
+        } else {
+          result.basis = 'graphql (REST protection API plan-limited)';
+          result.graphql_evidence = g.evidence;
+          result.unverified = [];
+          result.findings.push(...g.findings);
+          result.status = result.findings.length ? 'NONCOMPLIANT' : 'COMPLIANT';
+        }
+      }
+      results.push(result);
     }
   }
   return { results: applyBaseline(results, baseline), ownerErrors };
@@ -262,6 +322,8 @@ function renderMarkdown(report) {
   const lines = [`# Approval governance report`, '', `Generated: ${report.generated_at}`, `Founder: \`${report.founder}\``, ''];
   lines.push('| Status | Count |', '|---|---|');
   for (const [k, v] of Object.entries(report.summary.counts)) lines.push(`| ${k} | ${v} |`);
+  const viaGraphql = report.results.filter((r) => r.basis).length;
+  if (viaGraphql) lines.push('', `${viaGraphql} repo(s) verified via GraphQL because the REST protection API is plan-limited (GitHub Free private repos).`);
   lines.push('');
   if (report.summary.blocking.length) {
     lines.push('## Blocking findings', '');
@@ -300,6 +362,8 @@ async function cmdScan(args) {
       repos[r.repo] = { ...prev, accepted_status: r.status === 'UNVERIFIED' ? 'UNVERIFIED' : prev.accepted_status || 'COMPLIANT' };
       if (r.status === 'UNVERIFIED') repos[r.repo].unverified_reason = r.unverified[0];
       if (r.status !== 'UNVERIFIED') delete repos[r.repo].unverified_reason;
+      if (r.basis) repos[r.repo].basis = r.basis;
+      else delete repos[r.repo].basis;
     }
     const sorted = Object.fromEntries(Object.keys(repos).sort().map((k) => [k, repos[k]]));
     const next = { ...baseline, updated_at: new Date().toISOString(), repos: sorted };

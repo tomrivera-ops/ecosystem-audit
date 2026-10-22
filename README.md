@@ -33,9 +33,11 @@ Workflow: `.github/workflows/ecosystem-drift-gate.yml` — cron `0 6 * * *` + `w
 |---|---|
 | `COMPLIANT` | No approval-count, code-owner, last-push or environment-reviewer gate that a founder-authored PR cannot satisfy |
 | `NONCOMPLIANT` | At least one such gate is enforced (blocking) |
-| `UNVERIFIED` | A read failed (missing permission, plan-limited, unknown rule type). **Never treated as compliant.** Blocking unless recorded as a known gap in the coverage ledger |
+| `UNVERIFIED` | A read failed (missing permission, unknown rule type, or GraphQL fallback failed). **Never treated as compliant.** Blocking unless recorded as a known gap in the coverage ledger |
 | `EXCEPTION` | Documented external segregation-of-duties obligation in the ledger |
 | `NEW_REPO` | Repo not yet in coverage (blocking until added via `--update-baseline` PR) |
+
+GitHub Free private repos return 403 "Upgrade to GitHub Pro" from the REST protection API. For those, the monitor falls back to GraphQL, which still lists branch protection rules and rulesets (including inherited org rulesets) and each open PR's review decision. A repo is COMPLIANT only on positive evidence of no gate (`basis` recorded in the ledger); a GraphQL failure stays UNVERIFIED.
 
 Bot and AI reviews (`faraday-ci-bot`, `chatgpt-codex-connector`) are not human approval. The monitor never changes a protection; findings fail the nightly job and update one deduplicated `governance-drift` issue in this repo (closed automatically when clean). Reports are uploaded as 90-day artifacts; the ledger's git history is the permanent record.
 
