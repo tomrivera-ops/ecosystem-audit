@@ -115,6 +115,45 @@ test('founder account: private repos come from /user/repos; public-only fallback
   assert.ok(m.blockingFindings(res.results, res.ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|founder|private repos not listable')));
 });
 
+test('plan-limited private repo: GraphQL zero rules => COMPLIANT with basis; GraphQL gate => NONCOMPLIANT; GraphQL error => UNVERIFIED', async () => {
+  const limited = { status: 403, body: { message: 'Upgrade to GitHub Pro or make this repository public to enable this feature.' } };
+  const repoFx = (name) => ({
+    [`GET /repos/free/${name}/branches/main/protection`]: limited,
+    [`GET /repos/free/${name}/rules/branches/main`]: limited,
+    [`GET /repos/free/${name}/environments`]: { status: 200, body: { environments: [] } },
+  });
+  const gql = (rules, rulesets, prs) => ({ status: 200, body: { data: { repository: {
+    branchProtectionRules: { totalCount: rules.length, nodes: rules },
+    rulesets: { totalCount: rulesets.length, nodes: rulesets },
+    pullRequests: { nodes: prs } } } } });
+  const fx = {
+    'GET /orgs/free/repos?type=all&per_page=100&page=1': { status: 200, body: ['clean', 'gated', 'pr-blocked', 'broken'].map((n) => ({ full_name: `free/${n}`, default_branch: 'main' })) },
+    ...repoFx('clean'), ...repoFx('gated'), ...repoFx('pr-blocked'), ...repoFx('broken'),
+    'POST /graphql free/clean': gql([], [], [{ number: 1, reviewDecision: null }]),
+    'POST /graphql free/gated': gql([], [{ name: 'org-default', enforcement: 'ACTIVE', rules: { nodes: [{ type: 'PULL_REQUEST', parameters: { requiredApprovingReviewCount: 1, requireCodeOwnerReview: false } }] } }], []),
+    'POST /graphql free/pr-blocked': gql([{ pattern: 'main', requiredApprovingReviewCount: 0, requiresCodeOwnerReviews: false }], [], [{ number: 7, reviewDecision: 'REVIEW_REQUIRED' }]),
+    'POST /graphql free/broken': { status: 200, body: { errors: [{ message: 'Resource not accessible by integration' }] } },
+  };
+  const { results } = await m.scan(m.fixtureClient(fx), { founder: 'founder', owners: ['free'], repos: {} });
+  const by = Object.fromEntries(results.map((r) => [r.repo, r]));
+  assert.strictEqual(by['free/clean'].status, 'COMPLIANT');
+  assert.match(by['free/clean'].basis, /graphql/);
+  assert.deepStrictEqual(by['free/clean'].graphql_evidence, { branch_protection_rules: 0, rulesets: 0, open_prs_checked: 1 });
+  assert.strictEqual(by['free/gated'].status, 'NONCOMPLIANT');
+  assert.ok(by['free/gated'].findings[0].includes('ruleset[org-default:ACTIVE].required_approving_review_count=1'));
+  assert.strictEqual(by['free/pr-blocked'].status, 'NONCOMPLIANT');
+  assert.ok(by['free/pr-blocked'].findings.includes('graphql.open_pr#7.reviewDecision=REVIEW_REQUIRED'));
+  assert.strictEqual(by['free/broken'].status, 'UNVERIFIED');
+  assert.ok(by['free/broken'].unverified.some((u) => u.includes('Resource not accessible by integration')));
+});
+
+test('non-plan-limited 403 (missing permission) does not use the GraphQL fallback', async () => {
+  const { results } = await m.scan(m.fixtureClient(fleet), baseline);
+  const r = results.find((x) => x.repo === 'acme/missing-permission');
+  assert.strictEqual(r.status, 'UNVERIFIED');
+  assert.strictEqual(r.basis, undefined);
+});
+
 test('environment gates: non-founder reviewer and prevent_self_review are noncompliant', () => {
   const ok200 = { status: 200, body: [] };
   const r = m.classifyRepo({
