@@ -206,6 +206,23 @@ function fingerprint(keys) {
   return crypto.createHash('sha256').update(keys.join('\n')).digest('hex').slice(0, 16);
 }
 
+// A personal account's private repos are only visible through authenticated listings:
+// /user/repos (user token) or /installation/repositories (app installation token).
+// /users/{login}/repos returns public repos only, so falling back to it is reported, never silent.
+async function listUserRepos(request, owner) {
+  const mine = await paginate(request, owner, '/user/repos?affiliation=owner');
+  if (!mine.error) return { items: mine.items.filter((r) => r.owner && r.owner.login === owner) };
+  const inst = await request(owner, 'GET', '/installation/repositories?per_page=100');
+  if (inst.status === 200 && inst.body && Array.isArray(inst.body.repositories)) {
+    const items = inst.body.repositories.filter((r) => r.owner && r.owner.login === owner);
+    if ((inst.body.total_count || 0) <= 100) return { items };
+    return { items, partial: `installation lists ${inst.body.total_count} repos; only first 100 scanned` };
+  }
+  const pub = await paginate(request, owner, `/users/${owner}/repos?type=owner`);
+  if (pub.error) return pub;
+  return { items: pub.items, partial: 'private repos not listable (public listing only)' };
+}
+
 // ---------------------------------------------------------------------------
 // Scan
 // ---------------------------------------------------------------------------
@@ -215,13 +232,12 @@ async function scan(request, baseline) {
   const results = [];
   const ownerErrors = [];
   for (const owner of baseline.owners) {
-    const isUser = owner === founder;
-    const listPath = isUser ? `/users/${owner}/repos?type=owner` : `/orgs/${owner}/repos?type=all`;
-    const listed = await paginate(request, owner, listPath);
+    const listed = owner === founder ? await listUserRepos(request, owner) : await paginate(request, owner, `/orgs/${owner}/repos?type=all`);
     if (listed.error) {
       ownerErrors.push({ owner, error: readError(listed.error) });
       continue;
     }
+    if (listed.partial) ownerErrors.push({ owner, error: listed.partial });
     for (const repo of listed.items) {
       if (repo.archived) continue;
       const full = repo.full_name;

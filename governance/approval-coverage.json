@@ -284,6 +284,15 @@
     "signal-interface/studio-marketing": {
       "accepted_status": "COMPLIANT"
     },
+    "tomrivera-PSE/faraday-corp-ops": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-PSE/pse-api-playground": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-PSE/pse-apps": {
+      "accepted_status": "COMPLIANT"
+    },
     "tomrivera-PSE/tomrivera-PSE": {
       "accepted_status": "COMPLIANT"
     },
@@ -391,5 +400,5 @@
       "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
     }
   },
-  "updated_at": "2026-10-22T14:42:12.570Z"
+  "updated_at": "2026-10-22T15:26:40.494Z"
 }
