@@ -1,0 +1,50 @@
+name: App permission probe
+
+# Manual, read-only check that a freshly minted faraday-ci-bot installation token for one
+# owner carries Administration: read. The token is minted restricted to administration:read +
+# metadata:read, so the mint itself fails if the installation has not accepted the permission,
+# and the token cannot write. Uses the existing org-level app credentials; changes nothing.
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: "Installation owner (org or user login), e.g. tomrivera-ops"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: permission probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Mint read-only installation token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FARADAY_APP_ID }}
+          private-key: ${{ secrets.FARADAY_APP_PRIVATE_KEY }}
+          owner: ${{ inputs.owner }}
+          permission-administration: read
+          permission-metadata: read
+
+      - name: Probe branch protection reads
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          OWNER: ${{ inputs.owner }}
+        run: ./permission-probe.sh "$OWNER"
+
+      - name: Upload probe result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: permission-probe-${{ inputs.owner }}-${{ github.run_id }}
+          path: permission-probe.json
+          if-no-files-found: warn
+          retention-days: 90
