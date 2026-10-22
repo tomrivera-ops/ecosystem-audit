@@ -27,6 +27,7 @@ jobs:
         run: |
           for f in *.js; do node --check "$f"; done
           bash -n roster.sh
+          bash -n permission-probe.sh
 
       - name: Validate ledgers are well-formed JSON
         run: |
