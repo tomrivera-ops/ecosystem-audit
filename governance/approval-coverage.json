@@ -1,0 +1,395 @@
+{
+  "version": 1,
+  "founder": "tomrivera-PSE",
+  "policy": "https://github.com/tomrivera-ops/agent-contracts/blob/main/decisions/ADR-0013-solo-founder-human-approval.md",
+  "note": "Coverage ledger for governance-monitor.js. Update only via `node governance-monitor.js scan --update-baseline` in a PR. accepted_status UNVERIFIED records a known read gap; it is never compliance. `exception` documents an external segregation-of-duties obligation.",
+  "owners": [
+    "tomrivera-PSE",
+    "faraday-platform",
+    "tomrivera-ops",
+    "RVCG-Consulting",
+    "MARZ-ai",
+    "ESL-Gospel-Connection",
+    "signal-interface",
+    "orbitconsole",
+    "faraday-build",
+    "pulse-trading",
+    "faraday-capital-systems",
+    "tomrivera-dev",
+    "faraday-studio",
+    "faraday-beacon",
+    "faraday-accounting-control-panel-facp",
+    "faraday-enterprise",
+    "payroll-synergy-experts",
+    "faraday-music",
+    "coach-insight",
+    "jetson-protocol"
+  ],
+  "repos": {
+    "ESL-Gospel-Connection/esl-gospel-platform": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "MARZ-ai/marz-app": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "MARZ-ai/marz-brain": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "MARZ-ai/marz-docs": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "MARZ-ai/marz-infra": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "RVCG-Consulting/digital-business-launch-protocol": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "RVCG-Consulting/family-survival-operations": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "RVCG-Consulting/neurogrid-core": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "RVCG-Consulting/pcvl": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "RVCG-Consulting/rvcg-consulting": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "coach-insight/coach-insight": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-build/adversary": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-build/faraday-health": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-build/faraday-review": {
+      "accepted_status": "COMPLIANT"
+    },
+    "faraday-build/founder-pm": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-build/founder-pm-observer": {
+      "accepted_status": "COMPLIANT"
+    },
+    "faraday-capital-systems/faraday-architecture-registry": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-capital-systems/faraday-contracts": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-capital-systems/faraday-governance": {
+      "accepted_status": "COMPLIANT"
+    },
+    "faraday-capital-systems/faraday-legal": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-capital-systems/faraday-vault": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-capital-systems/global-security-tester": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-enterprise/cie-site": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-enterprise/freedom-core": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-music/music-box": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-agents": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-app-foundry": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-docs": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-gateway": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-marketing": {
+      "accepted_status": "COMPLIANT"
+    },
+    "faraday-platform/faraday-migration-toolkit": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-os": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-platform": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-runtime": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-security": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/faraday-web": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/shield-ai": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "faraday-platform/shield-lite": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "jetson-protocol/jp-foundation-drafts": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "orbitconsole/orbit-android-device-bridge": {
+      "accepted_status": "COMPLIANT"
+    },
+    "orbitconsole/orbit-console": {
+      "accepted_status": "COMPLIANT"
+    },
+    "orbitconsole/orbit-docs": {
+      "accepted_status": "COMPLIANT"
+    },
+    "payroll-synergy-experts/PSE--Projects": {
+      "accepted_status": "COMPLIANT"
+    },
+    "pulse-trading/pulse-ai-research": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-backtesting": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-broker-connectors": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-core": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-dashboard": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-data": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-docs": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-infra": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-journal": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-risk-engine": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "pulse-trading/pulse-strategy-engine": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/beacon-marketing": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/capital-access": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/design-intelligence": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/facp-marketing": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/identity-presence": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/marketing-engine": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/music-box-marketing": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/neurogrid-marketing": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/pse-marketing": {
+      "accepted_status": "COMPLIANT"
+    },
+    "signal-interface/signal-executive-interface": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/signal-payroll-validation-pilot": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/signal-pse-demo-deploy": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "signal-interface/studio-marketing": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-PSE/tomrivera-PSE": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/faraday-lab-control": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/faraday-labs": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/faraday-lora-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/faraday-registry": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/faraday-review": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/frontier-signal": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/gbrain-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/hermes-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/jcode-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/lab-template": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/math": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/mcp-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/memory-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/mistral-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/openclaw-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/rea": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/shield-lite": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-dev/spec-kit-lab": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-ops/.github": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-ops/agent-contracts": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/agent-transport": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/build-handoff-protocol": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/ecosystem-audit": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-ops/edge-ops": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/engineer-onboarding": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/faraday-validator": {
+      "accepted_status": "COMPLIANT"
+    },
+    "tomrivera-ops/linode-ops": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/platform-access-registry": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/promotion-launcher": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/sr-financial-ops": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    },
+    "tomrivera-ops/sr-holdings": {
+      "accepted_status": "UNVERIFIED",
+      "unverified_reason": "branch_protection: HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature."
+    }
+  },
+  "updated_at": "2026-10-22T14:42:12.570Z"
+}
