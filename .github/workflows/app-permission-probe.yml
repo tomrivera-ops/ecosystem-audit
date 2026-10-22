@@ -2,8 +2,9 @@ name: App permission probe
 
 # Manual, read-only check that a freshly minted faraday-ci-bot installation token for one
 # owner carries Administration: read. The token is minted restricted to administration:read +
-# metadata:read, so the mint itself fails if the installation has not accepted the permission,
-# and the token cannot write. Uses the existing org-level app credentials; changes nothing.
+# metadata:read so it cannot write. The mint can still succeed when the installation has not
+# accepted the permission (observed: run 39819000744), so the protection reads are the proof.
+# Uses the existing org-level app credentials; changes nothing.
 on:
   workflow_dispatch:
     inputs:
