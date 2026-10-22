@@ -172,6 +172,20 @@ test('owner_exceptions never excuse other owner failures', async () => {
   assert.ok(m.blockingFindings(results, ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|ghost|HTTP 404')));
 });
 
+test('--update-baseline promotes a re-verified repo from accepted UNVERIFIED to COMPLIANT', () => {
+  const { execFileSync } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gm-ratchet-'));
+  const b = JSON.parse(JSON.stringify(baseline));
+  b.repos['acme/compliant'] = { accepted_status: 'UNVERIFIED', unverified_reason: 'old gap' };
+  const bp = path.join(dir, 'b.json');
+  fs.writeFileSync(bp, JSON.stringify(b));
+  execFileSync(process.execPath, [path.join(__dirname, '..', 'governance-monitor.js'), 'scan', '--update-baseline',
+    '--fixtures', path.join(FIX, 'governance-fleet.json'), '--baseline', bp], { stdio: 'pipe' });
+  const after = JSON.parse(fs.readFileSync(bp, 'utf8')).repos;
+  assert.deepStrictEqual(after['acme/compliant'], { accepted_status: 'COMPLIANT' });
+  assert.strictEqual(after['acme/missing-permission'].accepted_status, 'UNVERIFIED');
+});
+
 test('environment gates: non-founder reviewer and prevent_self_review are noncompliant', () => {
   const ok200 = { status: 200, body: [] };
   const r = m.classifyRepo({

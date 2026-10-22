@@ -381,7 +381,9 @@ async function cmdScan(args) {
     const repos = { ...(baseline.repos || {}) };
     for (const r of results) {
       const prev = repos[r.repo] || {};
-      repos[r.repo] = { ...prev, accepted_status: r.status === 'UNVERIFIED' ? 'UNVERIFIED' : prev.accepted_status || 'COMPLIANT' };
+      // Ratchet: record the status verified now. A repo that is verified again must never keep an
+      // older accepted UNVERIFIED, or a later read failure on it would be masked.
+      repos[r.repo] = { ...prev, accepted_status: r.status === 'UNVERIFIED' ? 'UNVERIFIED' : 'COMPLIANT' };
       if (r.status === 'UNVERIFIED') repos[r.repo].unverified_reason = r.unverified[0];
       if (r.status !== 'UNVERIFIED') delete repos[r.repo].unverified_reason;
       if (r.basis) repos[r.repo].basis = r.basis;
