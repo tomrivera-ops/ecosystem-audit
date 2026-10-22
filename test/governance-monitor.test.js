@@ -154,6 +154,24 @@ test('non-plan-limited 403 (missing permission) does not use the GraphQL fallbac
   assert.strictEqual(r.basis, undefined);
 });
 
+test('owner without an installation token is uncovered; only a ledger owner_exception accepts it', async () => {
+  const b = { ...baseline, owners: ['acme', 'no-app'], repos: { ...baseline.repos, 'acme/brand-new': { accepted_status: 'COMPLIANT' } } };
+  const hasToken = (o) => o !== 'no-app';
+  let { results, ownerErrors } = await m.scan(m.fixtureClient(fleet), b, { hasToken });
+  assert.deepStrictEqual(ownerErrors.map((e) => e.owner), ['no-app']);
+  assert.ok(m.blockingFindings(results, ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|no-app|no app installation token')));
+  ({ results, ownerErrors } = await m.scan(m.fixtureClient(fleet), { ...b, owner_exceptions: { 'no-app': 'documented gap (test)' } }, { hasToken }));
+  assert.strictEqual(ownerErrors[0].accepted, true);
+  assert.ok(!m.blockingFindings(results, ownerErrors).some((k) => k.includes('no-app')));
+  assert.ok(results.some((r) => r.repo === 'acme/compliant'), 'covered owners are still scanned');
+});
+
+test('owner_exceptions never excuse other owner failures', async () => {
+  const b = { ...baseline, owners: ['ghost'], owner_exceptions: { ghost: 'only covers missing token' } };
+  const { results, ownerErrors } = await m.scan(m.fixtureClient(fleet), b);
+  assert.ok(m.blockingFindings(results, ownerErrors).some((k) => k.startsWith('UNVERIFIED_OWNER|ghost|HTTP 404')));
+});
+
 test('environment gates: non-founder reviewer and prevent_self_review are noncompliant', () => {
   const ok200 = { status: 200, body: [] };
   const r = m.classifyRepo({

@@ -25,6 +25,13 @@
     "coach-insight",
     "jetson-protocol"
   ],
+  "owner_exceptions": {
+    "coach-insight": "faraday-ci-bot not installed (installing would grant contents:write + pull_requests:write beyond the read-only need). Founder decision 2026-10-22: documented nightly coverage gap; verified COMPLIANT by founder-token scan 2026-10-22. Re-verify with `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`.",
+    "faraday-enterprise": "faraday-ci-bot not installed (installing would grant contents:write + pull_requests:write beyond the read-only need). Founder decision 2026-10-22: documented nightly coverage gap; verified COMPLIANT by founder-token scan 2026-10-22. Re-verify with `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`.",
+    "faraday-music": "faraday-ci-bot not installed (installing would grant contents:write + pull_requests:write beyond the read-only need). Founder decision 2026-10-22: documented nightly coverage gap; verified COMPLIANT by founder-token scan 2026-10-22. Re-verify with `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`.",
+    "jetson-protocol": "faraday-ci-bot not installed (installing would grant contents:write + pull_requests:write beyond the read-only need). Founder decision 2026-10-22: documented nightly coverage gap; verified COMPLIANT by founder-token scan 2026-10-22. Re-verify with `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`.",
+    "payroll-synergy-experts": "faraday-ci-bot not installed (installing would grant contents:write + pull_requests:write beyond the read-only need). Founder decision 2026-10-22: documented nightly coverage gap; verified COMPLIANT by founder-token scan 2026-10-22. Re-verify with `GH_TOKEN=$(gh auth token) node governance-monitor.js scan`."
+  },
   "repos": {
     "ESL-Gospel-Connection/esl-gospel-platform": {
       "accepted_status": "UNVERIFIED",
