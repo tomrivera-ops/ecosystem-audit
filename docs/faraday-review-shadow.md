@@ -1,7 +1,9 @@
 # Faraday Review shadow enrollment
 
-Status: **DRAFT, inactive.** This depends on `faraday-build/faraday-review` PR #4
-(the reusable `shadow.yml`) being merged.
+Status: **DRAFT, inactive.** The reusable `shadow.yml` it calls was merged in
+`faraday-build/faraday-review` PR #4 as merge commit
+`6407cab707815c538d0fb94241ce4e07feda8946` (2026-11-13); this caller is pinned
+to that commit.
 
 ## What it does
 `.github/workflows/faraday-review.yml` calls the reusable Faraday Review shadow
@@ -20,8 +22,8 @@ with `contents: read`, `pull-requests: write`, `checks: write` and
 `actions: read`.
 
 ## Activation (operator or founder; not done by this PR)
-1. Merge faraday-review PR #4. Replace both `99f1bf0…` occurrences with the
-   resulting merge commit SHA on faraday-review `main`, through a PR.
+1. Done: faraday-review PR #4 merged as `6407cab707815c538d0fb94241ce4e07feda8946`,
+   and both reviewer-SHA occurrences in the caller are pinned to it.
 2. Verify the live permissions and protection before you enable anything:
    ```bash
    gh api repos/tomrivera-ops/ecosystem-audit/branches/main/protection \

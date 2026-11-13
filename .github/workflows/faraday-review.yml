@@ -11,8 +11,8 @@ name: faraday-review
 # merge commit). The reusable workflow itself refuses any reviewer SHA that
 # is not on faraday-review main.
 #
-# DEPENDENCY: faraday-build/faraday-review PR #4. Replace REVIEWER_SHA (both
-# places) with the PR #4 merge commit on faraday-review main before enabling.
+# REVIEWER_SHA (both places) = faraday-build/faraday-review PR #4 merge commit
+# 6407cab707815c538d0fb94241ce4e07feda8946 on main (merged 2026-11-13).
 
 on:
   pull_request:
@@ -31,10 +31,10 @@ concurrency:
 jobs:
   faraday-review:
     if: vars.FARADAY_REVIEW_SHADOW_ENABLED == 'true'
-    # REVIEWER_SHA (pre-merge placeholder = PR #4 head; refused until on main)
-    uses: faraday-build/faraday-review/.github/workflows/shadow.yml@99f1bf0e83f481eaae50ceece338545fc9028ef5
+    # REVIEWER_SHA = faraday-review main merge commit of PR #4
+    uses: faraday-build/faraday-review/.github/workflows/shadow.yml@6407cab707815c538d0fb94241ce4e07feda8946
     with:
-      reviewer_sha: 99f1bf0e83f481eaae50ceece338545fc9028ef5
+      reviewer_sha: 6407cab707815c538d0fb94241ce4e07feda8946
       governance_sha: 1b98ab9b4aa13a0d481ef47972de62c3782e9f2a # faraday-governance v1.1.0
       policy_digest: ${{ vars.FARADAY_POLICY_DIGEST }}
       required_checks: |
