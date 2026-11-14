@@ -39,17 +39,23 @@ jobs:
           }
           app_jwt = jwt.encode(payload, private_key, algorithm='RS256')
 
-          def gh_api(url, method='GET'):
+          def gh_api(url, method='GET', body=None):
               req = urllib.request.Request(
                   url, method=method,
+                  data=json.dumps(body).encode() if body is not None else None,
                   headers={
                       'Authorization': f'Bearer {app_jwt}',
                       'Accept': 'application/vnd.github+json',
-                      'X-GitHub-Api-Version': '2022-11-28'
+                      'X-GitHub-Api-Version': '2022-11-28',
+                      **({'Content-Type': 'application/json'} if body is not None else {})
                   }
               )
               with urllib.request.urlopen(req) as r:
                   return json.loads(r.read())
+
+          READ_ONLY = {'contents': 'read', 'pull_requests': 'read',
+                       'administration': 'read', 'actions': 'read',
+                       'metadata': 'read'}
 
           installations = gh_api('https://api.github.com/app/installations')
           org_tokens = {}
@@ -57,10 +63,20 @@ jobs:
               org = inst['account']['login']
               inst_id = inst['id']
               try:
+                  # Least privilege: the drift gate only reads. Every
+                  # installation token is downgraded to read on each scope
+                  # the App holds, so a nightly run never holds contents or
+                  # pull_requests write (GHO-PRODUCTION-004 C5). Issue
+                  # alerts use this repo's own GITHUB_TOKEN, not these.
                   resp = gh_api(
                       f'https://api.github.com/app/installations/{inst_id}/access_tokens',
-                      method='POST'
+                      method='POST',
+                      body={'permissions': READ_ONLY}
                   )
+                  granted = resp.get('permissions', {})
+                  writes = sorted(k for k, v in granted.items() if v != 'read')
+                  if writes:
+                      raise RuntimeError(f'token has non-read scopes: {writes}')
                   org_tokens[org] = resp['token']
                   print(f'  token ok: {org}', file=sys.stderr)
               except Exception as e:
