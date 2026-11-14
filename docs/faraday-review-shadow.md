@@ -2,7 +2,9 @@
 
 Status: **DRAFT, inactive.** The reusable `shadow.yml` it calls was merged in
 `faraday-build/faraday-review` PR #4 as merge commit
-`6407cab707815c538d0fb94241ce4e07feda8946` (2026-11-13); this caller is pinned
+`6407cab707815c538d0fb94241ce4e07feda8946` (2026-11-13). PR #7 (agent-contracts v0.4.0
+execution identity) was merged on top of it as merge commit
+`b9002669fcc71f347f2cd91d4999a9b48fe4db78` (2026-11-14); this caller is pinned
 to that commit.
 
 ## What it does
@@ -22,8 +24,9 @@ with `contents: read`, `pull-requests: write`, `checks: write` and
 `actions: read`.
 
 ## Activation (operator or founder; not done by this PR)
-1. Done: faraday-review PR #4 merged as `6407cab707815c538d0fb94241ce4e07feda8946`,
-   and both reviewer-SHA occurrences in the caller are pinned to it.
+1. Done: faraday-review PR #4 merged as `6407cab707815c538d0fb94241ce4e07feda8946`;
+   PR #7 merged on top as `b9002669fcc71f347f2cd91d4999a9b48fe4db78`, and both
+   reviewer-SHA occurrences in the caller are pinned to the #7 merge.
 2. Verify the live permissions and protection before you enable anything:
    ```bash
    gh api repos/tomrivera-ops/ecosystem-audit/branches/main/protection \
