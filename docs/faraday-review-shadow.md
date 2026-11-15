@@ -27,8 +27,8 @@ with `contents: read`, `pull-requests: write`, `checks: write` and
 1. Done: faraday-review PR #4 merged as `6407cab707815c538d0fb94241ce4e07feda8946`;
    PR #7 merged on top as `b9002669fcc71f347f2cd91d4999a9b48fe4db78`, PR #10 merged as `cd3db20cf88c82675c9431b78983f7aeb12d20e7`,
    PR #9 as `52a1f20f42cbe83439473085a3b04704a67658e4` and PR #11 as `9addb4c27ef17672fb4176b4a932253037c54204`;
-   both reviewer-SHA occurrences in the caller are pinned to the #11 merge (the
-   final qualified faraday-review main).
+   PR #12 (check-runs response-shape fix found by the S6 smoke) as `193e1565f8583f4260a489a8ec51e3481b743655`;
+   both reviewer-SHA occurrences in the caller are pinned to the #12 merge.
 2. Verify the live permissions and protection before you enable anything:
    ```bash
    gh api repos/tomrivera-ops/ecosystem-audit/branches/main/protection \
