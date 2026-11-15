@@ -4,7 +4,7 @@ Status: **DRAFT, inactive.** The reusable `shadow.yml` it calls was merged in
 `faraday-build/faraday-review` PR #4 as merge commit
 `6407cab707815c538d0fb94241ce4e07feda8946` (2026-11-13). PR #7 (agent-contracts v0.4.0
 execution identity) was merged on top of it as merge commit
-`b9002669fcc71f347f2cd91d4999a9b48fe4db78` (2026-11-14); PR #10 merged as `cd3db20cf88c82675c9431b78983f7aeb12d20e7`; this caller is pinned
+`b9002669fcc71f347f2cd91d4999a9b48fe4db78` (2026-11-14); PR #10 merged as `cd3db20cf88c82675c9431b78983f7aeb12d20e7`, PR #9 as `52a1f20f42cbe83439473085a3b04704a67658e4` and PR #11 as `9addb4c27ef17672fb4176b4a932253037c54204`; this caller is pinned
 to that commit.
 
 ## What it does
@@ -25,8 +25,10 @@ with `contents: read`, `pull-requests: write`, `checks: write` and
 
 ## Activation (operator or founder; not done by this PR)
 1. Done: faraday-review PR #4 merged as `6407cab707815c538d0fb94241ce4e07feda8946`;
-   PR #7 merged on top as `b9002669fcc71f347f2cd91d4999a9b48fe4db78`, and PR #10 merged as `cd3db20cf88c82675c9431b78983f7aeb12d20e7`;
-   both reviewer-SHA occurrences in the caller are pinned to the #10 merge.
+   PR #7 merged on top as `b9002669fcc71f347f2cd91d4999a9b48fe4db78`, PR #10 merged as `cd3db20cf88c82675c9431b78983f7aeb12d20e7`,
+   PR #9 as `52a1f20f42cbe83439473085a3b04704a67658e4` and PR #11 as `9addb4c27ef17672fb4176b4a932253037c54204`;
+   both reviewer-SHA occurrences in the caller are pinned to the #11 merge (the
+   final qualified faraday-review main).
 2. Verify the live permissions and protection before you enable anything:
    ```bash
    gh api repos/tomrivera-ops/ecosystem-audit/branches/main/protection \
