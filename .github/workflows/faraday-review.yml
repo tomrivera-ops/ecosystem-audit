@@ -11,8 +11,8 @@ name: faraday-review
 # merge commit). The reusable workflow itself refuses any reviewer SHA that
 # is not on faraday-review main.
 #
-# REVIEWER_SHA (both places) = faraday-build/faraday-review PR #12 merge commit
-# 193e1565f8583f4260a489a8ec51e3481b743655 on main (merged 2026-11-15).
+# REVIEWER_SHA (both places) = faraday-build/faraday-review PR #14 merge commit
+# f3e1720d25d1c835927b01e4df26c8a63d161ef1 on main (merged 2026-11-15).
 # #7 carries agent-contracts v0.4.0 execution identity (event_id, execution
 # run_id/run_attempt) on top of the PR #4 reusable workflow.
 
@@ -33,10 +33,10 @@ concurrency:
 jobs:
   faraday-review:
     if: vars.FARADAY_REVIEW_SHADOW_ENABLED == 'true'
-    # REVIEWER_SHA = faraday-review main merge commit of PR #12
-    uses: faraday-build/faraday-review/.github/workflows/shadow.yml@193e1565f8583f4260a489a8ec51e3481b743655
+    # REVIEWER_SHA = faraday-review main merge commit of PR #14
+    uses: faraday-build/faraday-review/.github/workflows/shadow.yml@f3e1720d25d1c835927b01e4df26c8a63d161ef1
     with:
-      reviewer_sha: 193e1565f8583f4260a489a8ec51e3481b743655
+      reviewer_sha: f3e1720d25d1c835927b01e4df26c8a63d161ef1
       governance_sha: 1b98ab9b4aa13a0d481ef47972de62c3782e9f2a # faraday-governance v1.1.0
       policy_digest: ${{ vars.FARADAY_POLICY_DIGEST }}
       required_checks: |
