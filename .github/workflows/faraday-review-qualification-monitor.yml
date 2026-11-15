@@ -1,0 +1,28 @@
+# Faraday Review E1 qualification monitor (scheduled, read-only status view).
+# Calls the reusable faraday-review qualification-monitor workflow, pinned to
+# faraday-review main merge 462e2b0ffb57b31f076e5b5e51e4452fd3662162 (PR #17).
+# Inactive unless vars.FARADAY_REVIEW_MONITOR_ENABLED == 'true' (founder action).
+# It keeps one "Faraday Review qualification status" issue in this repository.
+# It never approves, merges or labels a pull request, and writes no repository contents.
+# Kill switches: gh variable delete FARADAY_REVIEW_MONITOR_ENABLED (monitor);
+# on CRITICAL also gh variable delete FARADAY_REVIEW_SHADOW_ENABLED (shadow).
+name: faraday-review-qualification-monitor
+on:
+  schedule:
+    - cron: "0 7 * * *"   # daily, after the 06:00 UTC Drift Gate
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  pull-requests: read
+  issues: write
+concurrency:
+  group: faraday-review-qualification-monitor
+  cancel-in-progress: false
+jobs:
+  monitor:
+    if: vars.FARADAY_REVIEW_MONITOR_ENABLED == 'true'
+    uses: faraday-build/faraday-review/.github/workflows/qualification-monitor.yml@462e2b0ffb57b31f076e5b5e51e4452fd3662162
+    with:
+      reviewer_sha: 462e2b0ffb57b31f076e5b5e51e4452fd3662162
